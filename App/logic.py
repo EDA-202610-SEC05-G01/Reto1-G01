@@ -432,12 +432,94 @@ def es_mejor_candidato(c1, c2):
         c2_weight = float(c2["weight_kg"])
         return c1_weight < c2_weight
     
-def req_5(catalog):
+def req_5(catalog, filtro, resolucion, min_year, max_year):
     """
     Retorna el resultado del requerimiento 5
     """
+
+    start_time = get_time()
+
+    tamanio = lt.size(catalog["computers"])
+    lista = lt.new_list()
+
+    filtro = filtro.upper()
+    
+    total_compu = 0
+    precio_suma = 0.0
+    tamaño_display_suma = 0.0
+    GPU_tier_suma = 0.0
+
+    for i in range(tamanio):
+            computer = lt.get_element(catalog["computers"], i)
+            
+            release = int(computer["release_year"])
+            if min_year <= release <= max_year:
+                if resolucion.strip() == computer["resolution"].strip():
+                    lt.add_last(lista, computer)
+                    total_compu += 1
+                    precio_suma += float(computer["price"])
+                    tamaño_display_suma += float(computer["display_size_in"])
+                    GPU_tier_suma += float(computer["gpu_tier"])
+    
+
+    mejor_computer = None
+
+    if filtro == "BARATO":
+        for i in range(lt.size(lista)):
+            computer = lt.get_element(lista, i)
+            if mejor_computer is None:
+                mejor_computer = computer
+                
+            elif float(computer["price"]) < float(mejor_computer["price"]):
+                mejor_computer = computer
+                
+            elif float(computer["price"]) == float(mejor_computer["price"]):
+                if float(computer["weight_kg"]) < float(mejor_computer["weight_kg"]):
+                    mejor_computer = computer
+                      
+
+    elif filtro == "CARO":
+        for i in range(lt.size(lista)):
+            computer = lt.get_element(lista, i)
+            if mejor_computer is None:
+                mejor_computer = computer
+                
+            elif float(computer["price"]) > float(mejor_computer["price"]):
+                mejor_computer = computer
+                
+            elif float(computer["price"]) == float(mejor_computer["price"]):
+                if float(computer["weight_kg"]) < float(mejor_computer["weight_kg"]):
+                    mejor_computer = computer
+
+    if total_compu > 0:
+        precio_promedio = precio_suma / total_compu
+        tamaño_display_promedio = tamaño_display_suma / total_compu
+        GPU_tier_promedio = GPU_tier_suma / total_compu
+    else:
+        precio_promedio = 0 
+        tamaño_display_promedio = 0
+        GPU_tier_promedio = 0
+        
+    mejor_info = None
+
+    if mejor_computer is not None:
+        mejor_info = {
+            "price": mejor_computer["price"],
+            "display_size": mejor_computer["display_size_in"],
+            "gpu_tier": mejor_computer["gpu_tier"],
+            "display_type": mejor_computer["display_type"],
+            "release_year": mejor_computer["release_year"],
+            "weight_kg": mejor_computer["weight_kg"]
+        }
+
+    
+
+    end_time = get_time()
+    tiempo_transcurrido = delta_time(start_time, end_time)
+
+    return tiempo_transcurrido, filtro, total_compu, mejor_info, precio_promedio, tamaño_display_promedio, GPU_tier_promedio 
+
     # TODO: Modificar el requerimiento 5
-    pass
 
 def req_6(catalog):
     """

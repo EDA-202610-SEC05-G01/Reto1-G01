@@ -290,6 +290,47 @@ def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
+    filtro = input("ingresa el filtro a evaluar (BARATO O CARO): ")
+    resolucion = input("ingresa la resolución a evaluar (FORMATO: 0000x000): ")
+    min_year = int(input("ingresa el año menor del rango: "))
+    max_year = int(input("ingresa el mayor año del rango: "))
+    
+    (tiempo_transcurrido, filtro, total_compu, mejor_info, 
+     precio_promedio, tamaño_display_promedio, 
+     GPU_tier_promedio) = logic.req_5(control, filtro, resolucion, min_year, max_year)
+    
+    print("\n" + "=" * 50)
+    print(" Requerimiento 5: Identificar el computador más barato/caro que tenga una resolución dada en un rango de año")
+    print("=" * 50)
+    print(f" Tiempo de ejecución: {tiempo_transcurrido:.3f} ms")
+    
+    if total_compu == 0:
+        print(" No se encontraron computadores con esas especificaciones.")
+        return
+    
+    else:
+
+        print(f" Filtro de selección de costo: {filtro}")
+        print(f" Número total de computadores que cumplen el filtro: {total_compu}\n")
+        
+        print("\n" + "=" * 50)
+        print(" Computador seleccionado según el filtro:")
+        print( "=" * 50)
+        
+        print(f"   Precio: ${mejor_info['price']}")
+        print(f"   Tamaño de pantalla: {mejor_info['display_size']} pulgadas")
+        print(f"   GPU tier: {mejor_info['gpu_tier']}")
+        print(f"   Tipo de display: {mejor_info['display_type']}")
+        print(f"   Año: {mejor_info['release_year']}")
+        print(f"   Peso: {mejor_info['weight_kg']} kg\n")
+
+        print(" Promedios de los computadores que cumplen el filtro:")
+        print(f"   Precio promedio: ${precio_promedio:.2f}")
+        print(f"   Tamaño promedio de pantalla: {tamaño_display_promedio:.2f} pulgadas")
+        print(f"   GPU tier promedio: {GPU_tier_promedio:.2f}")
+
+    
+    
     # TODO: Imprimir el resultado del requerimiento 5
     pass
 
