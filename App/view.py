@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import App.logic as logic
 from tabulate import tabulate
 from DataStructures.List import array_list as lt
@@ -234,7 +234,6 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
     cpu_brand = input(" Ingrese la marca de CPU: ").strip()
     gpu_model = input(" Ingrese el modelo de GPU: ").strip()
 
@@ -339,8 +338,101 @@ def print_req_6(control):
     """
         Función que imprime la solución del Requerimiento 6 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    min_year, max_year = logic.get_min_max_release_year(control)
+    if min_year is None:
+        print(" No hay datos cargados. Primero ejecuta la opción 0.")
+        return
+
+    print(f" Rango de años disponible en el dataset: {min_year} - {max_year}")
+    initial_year = int(input(" Ingrese el año inicial: "))
+    final_year = int(input(" Ingrese el año final: "))
+
+    (
+        elapsed_time,
+        total_count,
+        os_mas_usado, # diccionairio con info completa del OS que mas se usa
+        os_mas_recauda, #diccionario con info del que mas recauda
+        todos_los_os # diccionario con info detallada de todos los os que cumplen con el filtro
+    ) = logic.req_6(control, initial_year, final_year)
+
+    print("\n" + "=" * 65)
+    print(" Requerimiento 6: Sistema Operativo más usado y de mayor recaudación")
+    print("=" * 65)
+    print(f" Tiempo de ejecución: {elapsed_time:.3f} ms")
+    print(f" Total de computadores en el rango ({initial_year}-{final_year}): {total_count}")
+
+    if total_count == 0:
+        print(" No se encontraron computadores en este rango de años.")
+        return
+
+    if os_mas_usado is None:
+        os_mas_usado = {"nombre": "N/D", "count": 0, "recaudo_total": 0.0}
+    if os_mas_recauda is None:
+        os_mas_recauda = {"nombre": "N/D", "count": 0, "recaudo_total": 0.0}
+
+    destacados_table = [
+        [
+            "OS más usado",
+            os_mas_usado["nombre"],
+            os_mas_usado["count"],
+            f"${float(os_mas_usado['recaudo_total']):.2f}",
+        ],
+        [
+            "OS que más recauda",
+            os_mas_recauda["nombre"],
+            os_mas_recauda["count"],
+            f"${float(os_mas_recauda['recaudo_total']):.2f}",
+        ],
+    ]
+    print("\n" + "=" * 65)
+    print(" RESUMEN DE SISTEMAS OPERATIVOS DESTACADOS")
+    print("=" * 65)
+    print(tabulate(destacados_table, headers=["Categoría", "OS", "Registros", "Recaudo total"], tablefmt="pretty"))
+
+    print("\n" + "=" * 65)
+    print(" DETALLE POR SISTEMA OPERATIVO")
+    print("=" * 65)
+
+    resumen_os_rows = []
+    for os_nombre, info_os in todos_los_os.items():
+        resumen_os_rows.append([
+            os_nombre,
+            f"${float(info_os.get('promedio_precio', 0.0)):.2f}",
+            f"{float(info_os.get('promedio_peso', 0.0)):.2f} kg",
+        ])
+
+    print(tabulate(resumen_os_rows, headers=["OS", "Precio promedio", "Peso promedio"], tablefmt="pretty"))
+
+    for os_nombre, info_os in todos_los_os.items():
+        print("\n" + "-" * 65)
+        print(f" {os_nombre}")
+        print("-" * 65)
+        max_comp = info_os["mas_costoso"]
+        min_comp = info_os["mas_barato"]
+        comp_rows = [
+            [
+                "Más costoso",
+                max_comp["model"],
+                max_comp["brand"],
+                max_comp["release_year"],
+                f"{max_comp['cpu_brand']} {max_comp['cpu_model']}",
+                f"{max_comp['gpu_brand']} {max_comp['gpu_model']}",
+                f"${float(max_comp['price']):.2f}",
+            ],
+            [
+                "Más barato",
+                min_comp["model"],
+                min_comp["brand"],
+                min_comp["release_year"],
+                f"{min_comp['cpu_brand']} {min_comp['cpu_model']}",
+                f"{min_comp['gpu_brand']} {min_comp['gpu_model']}",
+                f"${float(min_comp['price']):.2f}",
+            ],
+        ]
+        headers = ["Tipo", "Modelo", "Marca", "Año", "CPU", "GPU", "Precio"]
+        print(tabulate(comp_rows, headers=headers, tablefmt="pretty"))
+
+    print("")
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -382,4 +474,3 @@ def main():
         else:
             print("Opción errónea, vuelva a elegir.\n")
     sys.exit(0)
-

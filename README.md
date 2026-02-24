@@ -33,8 +33,8 @@ This repository is part of the data structure and algorithms (#EDA) teaching fra
 The students edit this section to add their names, Uniandes emails, and specify which project functionality of the project they will implement.
 
 1. Student-1, Yury Dayana Velasquez Alvarez, <y.velasquez@uniandes.edu.co>
-1. Student-2, Nelson Fabian Reyes Marquez, <n.reyesm@uniandes.edu.co>
-1. Student-3, Luis Esteban Acevedo Ladino, <le.acevedo@uniandes.edu.co> 
+2. Student-2, Nelson Fabian Reyes Marquez, <n.reyesm@uniandes.edu.co>
+3. Student-3, Luis Esteban Acevedo Ladino, <le.acevedo@uniandes.edu.co> 
 
 [Back to top](#retos-template)
 

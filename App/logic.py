@@ -521,12 +521,129 @@ def req_5(catalog, filtro, resolucion, min_year, max_year):
 
     # TODO: Modificar el requerimiento 5
 
-def req_6(catalog):
+def req_6(catalog, inicio, fin):
     """
     Retorna el resultado del requerimiento 6
     """
-    # TODO: Modificar el requerimiento 6
-    pass
+    start_time = get_time()
+
+    if inicio > fin:
+        inicio, fin = fin, inicio
+
+    filtered = sll.new_list()
+    size = lt.size(catalog["computers"])
+
+    for i in range(size):
+        computer = lt.get_element(catalog["computers"], i)
+        year = int(computer["release_year"])
+
+        if inicio <= year <= fin:
+            sll.add_last(filtered, computer)
+
+    total_count = sll.size(filtered)
+    if total_count == 0:
+        end_time = get_time()
+        return delta_time(start_time, end_time), 0, {}, {}, {}
+
+    stats = {}
+    node = filtered["first"]
+    while node is not None:
+        computer = node["info"]
+        computer_os = computer["os"]
+        price = float(computer["price"])
+        weight = float(computer["weight_kg"])
+
+        if computer_os not in stats:
+            stats[computer_os] = {
+                "count": 1,
+                "recaudo_total": price,
+                "sum_peso": weight,
+                "mas_costoso": computer,
+                "mas_barato": computer,
+            }
+        else:
+            stats[computer_os]["count"] += 1
+            stats[computer_os]["recaudo_total"] += price
+            stats[computer_os]["sum_peso"] += weight
+
+            mas_costoso = stats[computer_os]["mas_costoso"]
+            mas_barato = stats[computer_os]["mas_barato"]
+
+            mas_costoso_price = float(mas_costoso["price"])
+            mas_costoso_weight = float(mas_costoso["weight_kg"])
+            if price > mas_costoso_price:
+                stats[computer_os]["mas_costoso"] = computer
+
+            mas_barato_price = float(mas_barato["price"])
+            mas_barato_weight = float(mas_barato["weight_kg"])
+            if price < mas_barato_price:
+                stats[computer_os]["mas_barato"] = computer
+
+        node = node["next"]
+
+    os_mas_usado = None
+    os_mas_recauda = None
+    todos_los_os = {}
+
+    for computer_os, info in stats.items():
+        promedio_precio = info["recaudo_total"] / info["count"]
+        promedio_peso = info["sum_peso"] / info["count"]
+
+        max_comp = info["mas_costoso"]
+        min_comp = info["mas_barato"]
+
+        todos_los_os[computer_os] = {
+            "promedio_precio": promedio_precio,
+            "promedio_peso": promedio_peso,
+            "mas_costoso": {
+                "model": max_comp["model"],
+                "brand": max_comp["brand"],
+                "release_year": int(max_comp["release_year"]),
+                "cpu_brand": max_comp["cpu_brand"],
+                "cpu_model": max_comp["cpu_model"],
+                "gpu_brand": max_comp["gpu_brand"],
+                "gpu_model": max_comp["gpu_model"],
+                "price": float(max_comp["price"]),
+            },
+            "mas_barato": {
+                "model": min_comp["model"],
+                "brand": min_comp["brand"],
+                "release_year": int(min_comp["release_year"]),
+                "cpu_brand": min_comp["cpu_brand"],
+                "cpu_model": min_comp["cpu_model"],
+                "gpu_brand": min_comp["gpu_brand"],
+                "gpu_model": min_comp["gpu_model"],
+                "price": float(min_comp["price"]),
+            },
+        }
+
+        if os_mas_usado is None or info["count"] > os_mas_usado["count"]:
+            os_mas_usado = {
+                "nombre": computer_os,
+                "count": info["count"],
+                "recaudo_total": info["recaudo_total"],
+            }
+
+        if os_mas_recauda is None or info["recaudo_total"] > os_mas_recauda["recaudo_total"]:
+            os_mas_recauda = {
+                "nombre": computer_os,
+                "count": info["count"],
+                "recaudo_total": info["recaudo_total"],
+            }
+
+
+    end_time = get_time()
+    elapsed_time = delta_time(start_time, end_time)
+
+    return elapsed_time, total_count, os_mas_usado, os_mas_recauda, todos_los_os
+
+
+
+
+            
+
+
+            
 
 
 # Funciones para medir tiempos de ejecucion
@@ -587,6 +704,29 @@ def get_min_max_price_computers(computers_list):
 
     return min_comp, max_comp
 
+
+def get_min_max_release_year(catalog):
+    """
+    Retorna el año mínimo y máximo de lanzamiento del catálogo.
+    """
+    size = lt.size(catalog["computers"])
+    if size == 0:
+        return None, None
+
+    first_comp = lt.get_element(catalog["computers"], 0)
+    min_year = int(first_comp["release_year"])
+    max_year = min_year
+
+    for i in range(1, size):
+        comp = lt.get_element(catalog["computers"], i)
+        year = int(comp["release_year"])
+        if year < min_year:
+            min_year = year
+        if year > max_year:
+            max_year = year
+
+    return min_year, max_year
+
 def get_first_five(catalog):
     """
     FunciÃ³n para obtener los 5 primeros computadores del dataset
@@ -608,4 +748,3 @@ def get_last_five(catalog):
         last_five.append(lt.get_element(catalog["computers"], i))
 
     return last_five
-
